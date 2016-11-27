@@ -206,7 +206,7 @@ func main(){
 app.Flags = []cli.Flag{
   cli.StringFlag{
 			Name:   "from, f",
-			Value:  "127.0.0.1:8000",
+			Value:  "127.0.0.1:10000",
 			EnvVar: "FWD_FROM",
 			Usage:  "source HOST:PORT",
 		},
