@@ -7,3 +7,9 @@ This is a tool to overcome the [deep packet inspection](https://en.wikipedia.org
 ## How do I know if the network is being DPI
 
 Typically there are two different ways of blocking the use of a service in the network. The first consists in dropping all tcp packets from all the ports but a few. With this kind of blocking a simple *telnet host port* would end up in a refused or not allowed connection. The second one is a little more sneaky and does allow you to connect any port, or at least don't explicitly blocks you, instead it keeps analyzing the patterns inside the packets and when some pattern that is blacklisted like ssh or smtp handshake messages then it will drop following packets for that TCP connection. The fundamental difference is the first don't allow you even to establish a tcp connection while the second simply start dropping the following packets after the pattern is found and matched with an internal blacklist.
+
+
+# Notes
+
+This tool was inspired in a very nice tool developed from a friend. [FWD](https://github.com/kintoandar/fwd) 
+Thanks @kintoandar for that
