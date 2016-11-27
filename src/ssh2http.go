@@ -207,12 +207,12 @@ app.Flags = []cli.Flag{
   cli.StringFlag{
 			Name:   "from, f",
 			Value:  "127.0.0.1:10000",
-			EnvVar: "FWD_FROM",
+			EnvVar: "SSH_FROM",
 			Usage:  "source HOST:PORT",
 		},
 		cli.StringFlag{
 			Name:   "to, t",
-			EnvVar: "FWD_TO",
+			EnvVar: "SSH_TO",
 			Usage:  "destination HOST:PORT",
 		},
     cli.BoolFlag{
