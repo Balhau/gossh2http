@@ -57,6 +57,12 @@ func Pipe(conn1 net.Conn, conn2 net.Conn) {
     }
 }
 
+func extractBase64Payload(httpString string) string {
+  strs0 := strings.Split(httpString,"<body>")
+  strs1 := strings.Split(strs0[1],"</body>")
+  return strs1[0]
+}
+
 func envelopeSSLServerHandshake(data []byte) string{
   base64sslHandShake := base64.StdEncoding.EncodeToString(data)
   httpEnvelope := `
@@ -69,8 +75,7 @@ func envelopeSSLServerHandshake(data []byte) string{
   return envelope
 }
 
-func handleSshClientConnection(remoteAddress string,client net.Conn){
-
+func handleSshHandshakeServer(remoteAddress string,client net.Conn) (sshServer net.Conn){
   bufIn := make([]byte, 1024)
 
   sshServer, err := net.Dial("tcp", remoteAddress)
@@ -79,28 +84,68 @@ func handleSshClientConnection(remoteAddress string,client net.Conn){
     fmt.Println("Error connecting:", err.Error())
   }
 
-  _,err = sshServer.Read(bufIn)
+  fmt.Println("Reading payload")
+
+  _,err = client.Read(bufIn)
+
+  fmt.Println("Payload readed")
 
   if err != nil {
     fmt.Println("Error reading:", err.Error())
   }
 
-  envelope := envelopeSSLServerHandshake(bufIn)
+  fmt.Println("Input String: ",string(bufIn))
 
-  client.Write([]byte(envelope))
+  sshB64Payload := extractBase64Payload(string(bufIn))
+
+  fmt.Println("sshb64Payload: ",sshB64Payload)
+
+  payload, err := base64.StdEncoding.DecodeString(sshB64Payload)
+
+  strPayload := strings.Trim(string(payload),"")
+  fmt.Println("payload: ",strPayload)
+
 
   if err != nil {
     fmt.Println("Error reading:", err.Error())
   }
 
-  client.Write([]byte(envelope))
+  sshServer.Write([]byte(strPayload))
 
+  return sshServer
+}
+
+func handleSshHandshakeClient(remoteAddress string,client net.Conn) (sshServer net.Conn){
+  bufIn := make([]byte, 1024)
+
+  sshServer, err := net.Dial("tcp", remoteAddress)
+
+  if err != nil {
+    fmt.Println("Error connecting:", err.Error())
+  }
+
+  _,err = client.Read(bufIn)
+
+  if err != nil {
+    fmt.Println("Error reading:", err.Error())
+  }
+
+  stringInput := strings.Trim(string(bufIn),"\x00")
+
+  envelope := envelopeSSLServerHandshake([]byte(stringInput))
+
+  sshServer.Write([]byte(envelope))
+  return sshServer
+}
+
+func handleSshClientConnection(remoteAddress string,client net.Conn){
+  sshServer := handleSshHandshakeClient(remoteAddress,client)
   Pipe(sshServer,client)
+}
 
-
-
-  // Close the connection when you're done with it.
-
+func handleSshServerConnection(remoteAddress string,client net.Conn){
+  sshServer := handleSshHandshakeServer(remoteAddress,client)
+  Pipe(sshServer,client)
 }
 
 func ctrlc() {
@@ -115,17 +160,31 @@ func ctrlc() {
 	}()
 }
 
-func serve(remoteAddress string,localPort string){
+func serveClient(localService string,remoteAddress string){
 
-  ln, _ := net.Listen("tcp","localhost:"+localPort)
+  ln, _ := net.Listen("tcp",localService)
 
   defer ln.Close()
 
-  fmt.Println("Listening on :" + localPort)
+  fmt.Println("Listening on :" + localService)
 
   for{
     conn, _ := ln.Accept()
+    fmt.Printf("New connection established from '%v'\n", conn.RemoteAddr())
     go handleSshClientConnection(remoteAddress,conn)
+  }
+}
+
+func serveServer(localService string,remoteSSHServer string){
+  ln, _ := net.Listen("tcp",localService)
+  defer ln.Close()
+
+  fmt.Println("Listening on: "+localService)
+
+  for{
+    conn, _ := ln.Accept()
+    fmt.Printf("New connection established from '%v'\n", conn.RemoteAddr())
+    go handleSshServerConnection(remoteSSHServer,conn)
   }
 }
 
@@ -156,9 +215,9 @@ app.Flags = []cli.Flag{
   color.Unset()
   app.Action = func(c *cli.Context) error {
     if c.Bool("serve"){
-
+      serveServer("localhost:10100","localhost:10200")
     }else{
-      serve("localhost:10100","10000")
+      serveClient("localhost:10000","localhost:10100")
     }
     return nil
   }
