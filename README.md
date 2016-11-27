@@ -77,6 +77,17 @@ The idea behind this is explained in the following diagram
     |------------|    |---------------|                 |---------------|     |---------|
 
 
+So for this you need to start the wrapperServer in a machine outside the monitored network, and
+a wrapperClient in your sshClient machine, the steps are the following
+
+
+      sudo ./ssh2http -s -f localhost:10000 -t sshserver.com:22 --> In the server machine
+      ./ssh2http -f localhost:10000 -t sshserver.com:10000
+      ssh login@localhost:10000
+
+As an running example you can check [here](https://www.youtube.com/watch?v=OK7DjsOyMp8) for a demo
+
+
 # Notes
 
 This tool was inspired in a very nice tool developed from a friend. [FWD](https://github.com/kintoandar/fwd)
