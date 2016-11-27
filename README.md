@@ -57,8 +57,8 @@ and get an output like the following. *Note that this is yet in development and 
          help, h  Shows a list of commands or help for one command
 
     GLOBAL OPTIONS:
-       --from value, -f value  source HOST:PORT (default: "127.0.0.1:10000") [$FWD_FROM]
-       --to value, -t value    destination HOST:PORT [$FWD_TO]
+       --from value, -f value  source HOST:PORT (default: "127.0.0.1:10000") [$SSH_FROM]
+       --to value, -t value    destination HOST:PORT [$SSH_TO]
        --serve, -s             list local addresses
        --help, -h              show help
        --version, -v           print the version
