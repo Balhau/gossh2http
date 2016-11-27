@@ -204,10 +204,21 @@ func main(){
 	}
 
 app.Flags = []cli.Flag{
-  cli.BoolFlag{
-			Name:  "serve, s",
-			Usage: "list local addresses",
+  cli.StringFlag{
+			Name:   "from, f",
+			Value:  "127.0.0.1:8000",
+			EnvVar: "FWD_FROM",
+			Usage:  "source HOST:PORT",
 		},
+		cli.StringFlag{
+			Name:   "to, t",
+			EnvVar: "FWD_TO",
+			Usage:  "destination HOST:PORT",
+		},
+    cli.BoolFlag{
+  			Name:  "serve, s",
+  			Usage: "list local addresses",
+  		},
   }
 
   color.Set(color.FgGreen)
@@ -215,9 +226,9 @@ app.Flags = []cli.Flag{
   color.Unset()
   app.Action = func(c *cli.Context) error {
     if c.Bool("serve"){
-      serveServer("localhost:10100","localhost:10200")
+      serveServer(c.String("from"),c.String("to"))
     }else{
-      serveClient("localhost:10000","localhost:10100")
+      serveClient(c.String("from"),c.String("to"))
     }
     return nil
   }
