@@ -91,4 +91,4 @@ As an running example you can check [here](https://www.youtube.com/watch?v=OK7Dj
 # Notes
 
 This tool was inspired in a very nice tool developed from a friend. [FWD](https://github.com/kintoandar/fwd)
-Thanks @kintoandar for that
+Thanks [@kintoandar](https://twitter.com/kintoandar) for that
