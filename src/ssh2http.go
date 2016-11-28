@@ -14,6 +14,21 @@ import (
 	//"runtime"
 )
 
+func logError(err error){
+  if(err!=nil){
+  }
+    color.Set(color.FgRed)
+    fmt.Println("Error reading:", err.Error())
+    color.Unset()
+}
+
+func logGreen(str string){
+  color.Set(color.FgGreen)
+  fmt.Println(str)
+  color.Unset()
+}
+
+
 func chanFromConn(conn net.Conn) chan []byte {
     c := make(chan []byte)
     go func() {
@@ -80,9 +95,7 @@ func handleSshHandshakeServer(remoteAddress string,client net.Conn) (sshServer n
 
   sshServer, err := net.Dial("tcp", remoteAddress)
 
-  if err != nil {
-    fmt.Println("Error connecting:", err.Error())
-  }
+  logError(err)
 
   fmt.Println("Reading payload")
 
@@ -90,9 +103,7 @@ func handleSshHandshakeServer(remoteAddress string,client net.Conn) (sshServer n
 
   fmt.Println("Payload readed")
 
-  if err != nil {
-    fmt.Println("Error reading:", err.Error())
-  }
+  logError(err)
 
   fmt.Println("Input String: ",string(bufIn))
 
@@ -102,13 +113,10 @@ func handleSshHandshakeServer(remoteAddress string,client net.Conn) (sshServer n
 
   payload, err := base64.StdEncoding.DecodeString(sshB64Payload)
 
+  logError(err)
+
   strPayload := strings.Trim(string(payload),"")
   fmt.Println("payload: ",strPayload)
-
-
-  if err != nil {
-    fmt.Println("Error reading:", err.Error())
-  }
 
   sshServer.Write([]byte(strPayload))
 
@@ -120,15 +128,11 @@ func handleSshHandshakeClient(remoteAddress string,client net.Conn) (sshServer n
 
   sshServer, err := net.Dial("tcp", remoteAddress)
 
-  if err != nil {
-    fmt.Println("Error connecting:", err.Error())
-  }
+  logError(err)
 
   _,err = client.Read(bufIn)
 
-  if err != nil {
-    fmt.Println("Error reading:", err.Error())
-  }
+  logError(err)
 
   stringInput := strings.Trim(string(bufIn),"\x00")
 
@@ -221,13 +225,12 @@ app.Flags = []cli.Flag{
   		},
   }
 
-  color.Set(color.FgGreen)
-  fmt.Println("This is a green message")
-  color.Unset()
   app.Action = func(c *cli.Context) error {
     if c.Bool("serve"){
+      logGreen("Started shh2http server-server")
       serveServer(c.String("from"),c.String("to"))
     }else{
+      logGreen("Started shh2http server-client")
       serveClient(c.String("from"),c.String("to"))
     }
     return nil
